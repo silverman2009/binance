@@ -1,0 +1,98 @@
+ 
+
+
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>Page Title</title>
+</head>
+<body>
+
+ 
+
+<b id="lblDelta"></b> </br>
+
+<b id="lblBuy"> </b></br>
+<b id="lblSell"> </b></br>
+<b id="lblPrice" > </b>
+
+<ul style="position: absolute;right: 0;top:0" id="lstBuy">
+ 
+</ul>
+
+</body>
+
+
+<script>
+const socket = new WebSocket("wss://fstream.binance.com/ws/btcusdt@trade");
+
+let buy = 0, sel = 0;
+let q = 0;
+
+let BuyVolume =0 ;
+let SellVolume =0;
+
+var lastT = 0; 
+
+
+let lblDelta = document.getElementById("lblDelta");
+let lblBuy = document.getElementById("lblBuy")
+let lblSell = document.getElementById("lblSell")
+let lblPrice = document.getElementById("lblPrice")
+let lstBuys = document.getElementById("lstBuy")
+
+
+socket.onmessage= function(event) {
+	
+		 let d =   JSON.parse(event.data);
+		 
+		
+		
+		
+		let t = new Date( d["T"] );
+		if ( lastT !== t.getMinutes()){
+			lastT = t.getMinutes();
+			q =0;
+			BuyVolume = 0;
+			SellVolume = 0;
+			console.log("CHangeeeeeeeeeeeeeeeeeeeeeeeeee: "  + t.getMinutes())
+		}
+		
+		q += d["q"]*1
+		//q += (d["q"] *  d["p"])
+		
+		if(d["m"] == true)
+			SellVolume += d["q"] * 1;
+		else
+			BuyVolume += d["q"] * 1;
+			
+		
+		if(((BuyVolume * 1) - (SellVolume*1))>0)
+			lblDelta.style = "color: green"
+		else
+			lblDelta.style = "color: red"
+	 
+		 
+		lblDelta.innerText = "Delta: " +((BuyVolume * 1) - (SellVolume*1)).toFixed(2)
+		lblBuy.innerText =  "Buy: " +  BuyVolume.toFixed(2)
+		lblSell.innerText = "Sell: " +  SellVolume.toFixed(2) 
+		
+		
+		
+		lblPrice.innerText =  d["p"]
+		
+		if(d["m"] == true)
+			lblPrice.style = "color:red";
+		else
+			lblPrice.style = "color:green";
+		
+		if( d["q"]> 1) 
+			lstBuys.innerHTML = "<li>" + d["q"] +"</li>";
+			
+		
+		 
+  //console.log(event);
+} 
+</script>
+</html>
